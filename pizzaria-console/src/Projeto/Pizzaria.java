@@ -7,6 +7,8 @@ import java.util.Scanner;
 public class Pizzaria {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        List<Cliente> listaCliente = new ArrayList<>();
+        List<Pedido> listaPedidos = new ArrayList<>();
 
         boolean continuar = true;
 
@@ -16,28 +18,36 @@ public class Pizzaria {
             System.out.println("2 - Alterar um pedido ");
             System.out.println("3 - Adicionar um cliente ");
             System.out.println("4 - Gerar relatório de vendas ");
+            System.out.println("5 - Gerar lista de clientes");
             System.out.println("9 - Sair");
 
-            System.out.print("Opção ");
+            System.out.print("Opção: ");
             int opcao = scanner.nextInt();
             scanner.nextLine();
+            System.out.println();
 
             switch (opcao){
                 case 1:
-                    fazerPedido();
+                    fazerPedido(scanner, listaPedidos, listaCliente);
                     break;
                 case 2:
                     alterarPedido();
                     break;
                 case 3:
-                    adicionarCliente();
+                    listaCliente.add(adicionarCliente(scanner));
+                    System.out.println("Cliente adicionado com sucesso! ");
+                    System.out.println();
                     break;
                 case 4:
                     gerarRelatorio();
                     break;
+                case 5:
+                    gerarListaClientes(listaCliente);
+                    break;
                 case 9:
                     System.out.println("Até amanhã...");
                     continuar = false;
+                    scanner.close();
                     break;
                 default:
                     break;
@@ -46,19 +56,108 @@ public class Pizzaria {
 
     }
 
-    private static void fazerPedido() {
+
+    private static void fazerPedido(Scanner scanner, List<Pedido> listaPedido, List<Cliente> listaClientes) {
+        List<Pizza> pizzas = new ArrayList<>();
         System.out.println("Fazer pedido");
+        int x = 1;
+        System.out.println("Selecione um cliente: ");
+        for (Cliente cliente : listaClientes){
+            System.out.println(x + " - " + cliente.getNome());
+            x++;
+        }
+        System.out.println("Opção: ");
+        int cliente = scanner.nextInt();
+        scanner.nextLine();
+
+        x = 1;
+        System.out.println("Qual o tamanho da pizza? ");
+        System.out.println("Selecione um tamanho ");
+        for (Pizza.TamanhoPizza tamanhos : Pizza.TamanhoPizza.values()){
+            System.out.println(x + " - " + tamanhos);
+            x++;
+        }
+        System.out.println("Opção: ");
+        int tamanho = scanner.nextInt();
+        scanner.nextLine();
+
+        int quantidadeSabores = 0;
+
+        while (quantidadeSabores < 1 || quantidadeSabores > 4){
+            System.out.println("Digite a quantidade de sabores: 1 - 4 ");
+            System.out.println("Opcão: ");
+            quantidadeSabores = scanner.nextInt();
+            scanner.nextLine();
+        }
+
+        Cardapio cardapio = new Cardapio();
+        List<String> saboresList = new ArrayList<>();
+        List<String> saboresSelecionados = new ArrayList<>();
+
+        for (int i = 0; i < quantidadeSabores; i++){
+            x = 1;
+            System.out.println("Selecione o sabor da pizza: ");
+            for (String sabor : cardapio.getCardapio().keySet()){
+                saboresList.add(sabor);
+                System.out.println(x + " - " + sabor);
+                x++;
+            }
+            System.out.println("Opção: ");
+            int sabor = scanner.nextInt();
+            scanner.nextLine();
+            saboresSelecionados.add(saboresList.get(sabor - 1));
+
+        }
+        Pizza pizza = new Pizza(saboresSelecionados, cardapio.getPrecoJusto(saboresSelecionados), Pizza.TamanhoPizza.getByIndex(tamanho - 1));
+        pizzas.add(pizza);
+
+        Pedido pedido = new Pedido(listaPedido.size() + 1, listaClientes.get(cliente - 1), pizzas, pizza.getPreco());
+        listaPedido.add(pedido);
     }
 
     private static void alterarPedido() {
         System.out.println("Alterar Pedido");
     }
-    private static void adicionarCliente() {
+    private static Cliente adicionarCliente(Scanner scanner) {
         System.out.println("Adicionar cliente");
+        System.out.println();
+        System.out.print("Digite o nome do cliente: ");
+        String nome = scanner.nextLine();
+        System.out.println();
+        System.out.print("Digite o endereço do cliente: ");
+        String endereco = scanner.nextLine();
+        System.out.println();
+        System.out.print("Digite o telefone do cliente: ");
+        String telefone = scanner.nextLine();
+        System.out.println();
+        System.out.print("Digite o email do cliente: ");
+        String email = scanner.nextLine();
+        System.out.println();
+
+        return new Cliente(nome,endereco,telefone,email);
     }
 
     private static void gerarRelatorio() {
         System.out.println("gerar relatorio");
     }
+
+    private static void gerarListaClientes(List<Cliente> listaClientes) {
+        int x = 1;
+        if (listaClientes.isEmpty()){
+            System.out.println("A lista de clientes está vazia. ");
+            System.out.println();
+        }
+
+        for (Cliente cliente : listaClientes ){
+            System.out.println("Cliente " + x);
+            System.out.println(cliente.getNome());
+            System.out.println(cliente.getEmail());
+            System.out.println(cliente.getEndereco());
+            System.out.println(cliente.getTelefone());
+            System.out.println();
+            x++;
+        }
+    }
+
 
 }
